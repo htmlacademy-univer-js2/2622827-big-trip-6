@@ -80,6 +80,8 @@ export default class PointView {
     this.point = point;
     this.destination = destination;
     this.offers = offers;
+
+    this._favoriteClickHandler = this._favoriteClickHandler.bind(this);
   }
 
   getTemplate() {
@@ -89,13 +91,30 @@ export default class PointView {
   getElement() {
     if (!this.element) {
       this.element = createElement(this.getTemplate());
+      this.element
+        .querySelector('.event__favorite-btn')
+        .addEventListener('click', this._favoriteClickHandler);
     }
 
     return this.element;
   }
 
   removeElement() {
+    if (this.element) {
+      this.element
+        .querySelector('.event__favorite-btn')
+        .removeEventListener('click', this._favoriteClickHandler);
+    }
+
     this.element = null;
+  }
+
+  _favoriteClickHandler() {
+    this.point.isFavorite = !this.point.isFavorite;
+
+    const button = this.element.querySelector('.event__favorite-btn');
+
+    button.classList.toggle('event__favorite-btn--active', this.point.isFavorite);
   }
 }
 

@@ -1,8 +1,8 @@
 import SortView from '../view/sort-view.js';
 import PointListView from '../view/point-list-view.js';
 import PointView from '../view/point-view.js';
-import EditFormView from '../view/edit-form-view.js';
-import {render, RenderPosition, createElement} from '../render.js';
+import CreateFormView from '../view/create-form-view.js';
+import {render, createElement} from '../render.js';
 
 class ListItemView {
   constructor(contentView) {
@@ -40,30 +40,13 @@ export default class BoardPresenter {
     const offersByType = this.pointsModel.getOffersByType();
 
     render(new SortView(), this.boardContainer);
+
+    // Форма создания (первое окно) — над списком
+    render(new CreateFormView(), this.boardContainer);
+
     render(this.pointListComponent, this.boardContainer);
 
-    const pointForEdit = points[0];
-    const destinationForEdit = destinations.find(
-      (destination) => destination.id === pointForEdit.destinationId,
-    );
-    const offersOfTypeForEdit = offersByType.find(
-      (offer) => offer.type === pointForEdit.type,
-    ).offers;
-
-    const editFormView = new EditFormView({
-      point: pointForEdit,
-      destination: destinationForEdit,
-      offers: offersOfTypeForEdit,
-      destinations,
-    });
-
-    render(
-      new ListItemView(editFormView),
-      this.pointListComponent.getElement(),
-      RenderPosition.AFTERBEGIN,
-    );
-
-    const POINTS_TO_RENDER = 3;
+    const POINTS_TO_RENDER = 5;
 
     for (let i = 0; i < Math.min(points.length, POINTS_TO_RENDER); i++) {
       const point = points[i];
