@@ -1,4 +1,4 @@
-import {createElement} from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 import {
   humanizePointDate,
   humanizePointTime,
@@ -75,46 +75,43 @@ const createPointTemplate = (point, destination, offers) => {
   );
 };
 
-export default class PointView {
-  constructor({point, destination, offers}) {
-    this.point = point;
-    this.destination = destination;
-    this.offers = offers;
+export default class PointView extends AbstractView {
+  #point;
+  #destination;
+  #offers;
+  #handleEditClick;
+  #handleFavoriteClick;
 
-    this._favoriteClickHandler = this._favoriteClickHandler.bind(this);
+  constructor({point, destination, offers, onEditClick, onFavoriteClick}) {
+    super();
+    this.#point = point;
+    this.#destination = destination;
+    this.#offers = offers;
+    this.#handleEditClick = onEditClick;
+    this.#handleFavoriteClick = onFavoriteClick;
+
+    this.element
+      .querySelector('.event__rollup-btn')
+      .addEventListener('click', this.#editClickHandler);
+
+    this.element
+      .querySelector('.event__favorite-btn')
+      .addEventListener('click', this.#favoriteClickHandler);
   }
 
-  getTemplate() {
-    return createPointTemplate(this.point, this.destination, this.offers);
+  get template() {
+    return createPointTemplate(this.#point, this.#destination, this.#offers);
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-      this.element
-        .querySelector('.event__favorite-btn')
-        .addEventListener('click', this._favoriteClickHandler);
-    }
+  #editClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleEditClick?.();
+  };
 
-    return this.element;
-  }
-
-  removeElement() {
-    if (this.element) {
-      this.element
-        .querySelector('.event__favorite-btn')
-        .removeEventListener('click', this._favoriteClickHandler);
-    }
-
-    this.element = null;
-  }
-
-  _favoriteClickHandler() {
-    this.point.isFavorite = !this.point.isFavorite;
-
-    const button = this.element.querySelector('.event__favorite-btn');
-
-    button.classList.toggle('event__favorite-btn--active', this.point.isFavorite);
-  }
+  #favoriteClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleFavoriteClick?.();
+  };
 }
+
 

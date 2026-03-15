@@ -1,8 +1,7 @@
-import {createElement} from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 
-function createCreateFormTemplate() {
-  return (
-    `<form class="event event--edit" action="#" method="post">
+const createCreateFormTemplate = () => (
+  `<form class="event event--edit" action="#" method="post">
       <header class="event__header">
         <div class="event__type-wrapper">
           <label class="event__type  event__type-btn" for="event-type-toggle-1">
@@ -62,8 +61,7 @@ function createCreateFormTemplate() {
             </fieldset>
           </div>
         </div>
-
-        <div class="event__field-group  event__field-group--destination">
+                <div class="event__field-group  event__field-group--destination">
           <label class="event__label  event__type-output" for="event-destination-1">
             Flight
           </label>
@@ -134,8 +132,7 @@ function createCreateFormTemplate() {
                 <span class="event__offer-price">5</span>
               </label>
             </div>
-
-            <div class="event__offer-selector">
+                        <div class="event__offer-selector">
               <input class="event__offer-checkbox  visually-hidden" id="event-offer-train-1" type="checkbox" name="event-offer-train">
               <label class="event__offer-label" for="event-offer-train-1">
                 <span class="event__offer-title">Travel by train</span>
@@ -162,23 +159,10 @@ function createCreateFormTemplate() {
         </section>
       </section>
     </form>`
-  );
-}
+);
 
-export default class CreateFormView {
-  getTemplate() {
+export default class CreateFormView extends AbstractView {
+  get template() {
     return createCreateFormTemplate();
-  }
-
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
   }
 }
