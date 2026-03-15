@@ -1,4 +1,4 @@
-import AbstractView from '../framework/view/abstract-view.js';
+import {createElement} from '../render.js';
 import {POINT_TYPES} from '../const.js';
 import {humanizeEditFormDateTime} from '../utils.js';
 
@@ -123,23 +123,15 @@ const createEditFormTemplate = ({point, destination, offers, destinations}) => {
   );
 };
 
-export default class EditFormView extends AbstractView {
-  constructor({point, destination, offers, destinations, onFormSubmit, onRollupClick}) {
-    super();
-
+export default class EditFormView {
+  constructor({point, destination, offers, destinations}) {
     this.point = point;
     this.destination = destination;
     this.offers = offers;
     this.destinations = destinations;
-
-    this._onFormSubmit = onFormSubmit;
-    this._onRollupClick = onRollupClick;
-
-    this._formSubmitHandler = this._formSubmitHandler.bind(this);
-    this._rollupClickHandler = this._rollupClickHandler.bind(this);
   }
 
-  get template() {
+  getTemplate() {
     return createEditFormTemplate({
       point: this.point,
       destination: this.destination,
@@ -148,42 +140,16 @@ export default class EditFormView extends AbstractView {
     });
   }
 
-  removeElement() {
-    if (this.element) {
-      this.element
-        .querySelector('form')
-        .removeEventListener('submit', this._formSubmitHandler);
-
-      this.element
-        .querySelector('.event__rollup-btn')
-        .removeEventListener('click', this._rollupClickHandler);
+  getElement() {
+    if (!this.element) {
+      this.element = createElement(this.getTemplate());
     }
 
-    super.removeElement();
+    return this.element;
   }
 
-  _formSubmitHandler(evt) {
-    evt.preventDefault();
-    this._onFormSubmit?.();
-  }
-
-  _rollupClickHandler(evt) {
-    evt.preventDefault();
-    this._onRollupClick?.();
-  }
-
-  get element() {
-    const element = super.element;
-
-    element
-      .querySelector('form')
-      .addEventListener('submit', this._formSubmitHandler);
-
-    element
-      .querySelector('.event__rollup-btn')
-      .addEventListener('click', this._rollupClickHandler);
-
-    return element;
+  removeElement() {
+    this.element = null;
   }
 }
 

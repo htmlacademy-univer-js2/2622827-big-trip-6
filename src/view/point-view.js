@@ -1,4 +1,4 @@
-import AbstractView from '../framework/view/abstract-view.js';
+import {createElement} from '../render.js';
 import {
   humanizePointDate,
   humanizePointTime,
@@ -75,21 +75,28 @@ const createPointTemplate = (point, destination, offers) => {
   );
 };
 
-export default class PointView extends AbstractView {
-  constructor({point, destination, offers, onEditClick}) {
-    super();
-
+export default class PointView {
+  constructor({point, destination, offers}) {
     this.point = point;
     this.destination = destination;
     this.offers = offers;
 
     this._favoriteClickHandler = this._favoriteClickHandler.bind(this);
-    this._editClickHandler = this._editClickHandler.bind(this);
-    this._onEditClick = onEditClick;
   }
 
-  get template() {
+  getTemplate() {
     return createPointTemplate(this.point, this.destination, this.offers);
+  }
+
+  getElement() {
+    if (!this.element) {
+      this.element = createElement(this.getTemplate());
+      this.element
+        .querySelector('.event__favorite-btn')
+        .addEventListener('click', this._favoriteClickHandler);
+    }
+
+    return this.element;
   }
 
   removeElement() {
@@ -97,13 +104,9 @@ export default class PointView extends AbstractView {
       this.element
         .querySelector('.event__favorite-btn')
         .removeEventListener('click', this._favoriteClickHandler);
-
-      this.element
-        .querySelector('.event__rollup-btn')
-        .removeEventListener('click', this._editClickHandler);
     }
 
-    super.removeElement();
+    this.element = null;
   }
 
   _favoriteClickHandler() {
@@ -112,25 +115,6 @@ export default class PointView extends AbstractView {
     const button = this.element.querySelector('.event__favorite-btn');
 
     button.classList.toggle('event__favorite-btn--active', this.point.isFavorite);
-  }
-
-  _editClickHandler(evt) {
-    evt.preventDefault();
-    this._onEditClick?.();
-  }
-
-  get element() {
-    const element = super.element;
-
-    element
-      .querySelector('.event__favorite-btn')
-      .addEventListener('click', this._favoriteClickHandler);
-
-    element
-      .querySelector('.event__rollup-btn')
-      .addEventListener('click', this._editClickHandler);
-
-    return element;
   }
 }
 
