@@ -3,6 +3,7 @@ import PointListView from '../view/point-list-view.js';
 import PointView from '../view/point-view.js';
 import EditFormView from '../view/edit-form-view.js';
 import CreateFormView from '../view/create-form-view.js';
+import NoPointView from '../view/no-point-view.js';
 import {render, replace} from '../framework/render.js';
 
 export default class BoardPresenter {
@@ -17,6 +18,11 @@ export default class BoardPresenter {
     const points = this.pointsModel.getPoints();
     const destinations = this.pointsModel.getDestinations();
     const offersByType = this.pointsModel.getOffersByType();
+
+    if (points.length === 0) {
+      render(new NoPointView(), this.boardContainer);
+      return;
+    }
 
     render(new SortView(), this.boardContainer);
     render(new CreateFormView(), this.boardContainer);

@@ -7,13 +7,14 @@ const filtersContainer = document.querySelector('.trip-controls__filters');
 const tripEventsSection = document.querySelector('.trip-events');
 
 const pointsModel = new PointsModel();
+const filters = pointsModel.getFilters();
 
 const boardPresenter = new BoardPresenter({
   boardContainer: tripEventsSection,
   pointsModel,
 });
 
-render(new FilterView(), filtersContainer);
+render(new FilterView({filters}), filtersContainer);
 
 boardPresenter.init();
 
