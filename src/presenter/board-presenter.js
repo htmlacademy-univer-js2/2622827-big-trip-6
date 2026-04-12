@@ -1,13 +1,13 @@
 import SortView from '../view/sort-view.js';
 import PointListView from '../view/point-list-view.js';
-import PointView from '../view/point-view.js';
-import EditFormView from '../view/edit-form-view.js';
 import CreateFormView from '../view/create-form-view.js';
 import NoPointView from '../view/no-point-view.js';
-import {render, replace} from '../framework/render.js';
+import PointPresenter from './point-presenter.js';
+import {render} from '../framework/render.js';
 
 export default class BoardPresenter {
   pointListComponent = new PointListView();
+  #pointPresenters = [];
 
   constructor({boardContainer, pointsModel}) {
     this.boardContainer = boardContainer;
@@ -31,66 +31,30 @@ export default class BoardPresenter {
     const POINTS_TO_RENDER = 5;
 
     for (let i = 0; i < Math.min(points.length, POINTS_TO_RENDER); i++) {
-      this.#renderPoint({
+      const pointPresenter = new PointPresenter({
+        pointListContainer: this.pointListComponent.element,
         point: points[i],
         destinations,
         offersByType,
+        onPointChange: this.#handlePointChange,
+        onBeforeEdit: this.#resetAllPointViewsToDefault,
       });
+      pointPresenter.init();
+      this.#pointPresenters.push(pointPresenter);
     }
   }
 
-  #renderPoint({point, destinations, offersByType}) {
-    const destination = destinations.find(
-      (item) => item.id === point.destinationId,
+  #handlePointChange = (updatedPoint) => {
+    this.pointsModel.updatePoint(updatedPoint);
+    const presenter = this.#pointPresenters.find(
+      (item) => item.pointId === updatedPoint.id,
     );
-    const offersOfType = offersByType.find(
-      (offer) => offer.type === point.type,
-    ).offers;
-    const selectedOffers = offersOfType.filter((offer) =>
-      point.offers.includes(offer.id),
-    );
+    presenter?.update(updatedPoint);
+  };
 
-    const pointComponent = new PointView({
-      point,
-      destination,
-      offers: selectedOffers,
-      onEditClick: () => replacePointToForm(),
-      onFavoriteClick: () => {
-        point.isFavorite = !point.isFavorite;
-        pointComponent.element
-          .querySelector('.event__favorite-btn')
-          .classList.toggle('event__favorite-btn--active', point.isFavorite);
-      },
-    });
-
-    const editFormComponent = new EditFormView({
-      point,
-      destination,
-      offers: offersOfType,
-      destinations,
-      onFormSubmit: () => replaceFormToPoint(),
-      onRollupClick: () => replaceFormToPoint(),
-    });
-
-    function escKeyDownHandler(evt) {
-      if (evt.key === 'Escape' || evt.key === 'Esc') {
-        evt.preventDefault();
-        replace(pointComponent, editFormComponent);
-        document.removeEventListener('keydown', escKeyDownHandler);
-      }
+  #resetAllPointViewsToDefault = () => {
+    for (const presenter of this.#pointPresenters) {
+      presenter.resetView();
     }
-
-    function replacePointToForm() {
-      replace(editFormComponent, pointComponent);
-      document.addEventListener('keydown', escKeyDownHandler);
-    }
-
-    function replaceFormToPoint() {
-      replace(pointComponent, editFormComponent);
-      document.removeEventListener('keydown', escKeyDownHandler);
-    }
-
-    render(pointComponent, this.pointListComponent.element);
-  }
+  };
 }
-
