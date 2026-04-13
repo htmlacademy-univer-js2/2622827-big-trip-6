@@ -110,8 +110,11 @@ export default class PointView extends AbstractView {
 
   #favoriteClickHandler = (evt) => {
     evt.preventDefault();
-    this.#handleFavoriteClick?.();
+    const updatedPoint = {
+      ...this.#point,
+      isFavorite: !this.#point.isFavorite,
+    };
+    this.#handleFavoriteClick?.(updatedPoint);
   };
 }
-
 
