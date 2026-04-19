@@ -4,10 +4,14 @@ import CreateFormView from '../view/create-form-view.js';
 import NoPointView from '../view/no-point-view.js';
 import PointPresenter from './point-presenter.js';
 import {render} from '../framework/render.js';
+import {SORT_TYPES} from '../const.js';
 
 export default class BoardPresenter {
   pointListComponent = new PointListView();
+  #sortComponent = null;
   #pointPresenters = [];
+  #currentSortType = SORT_TYPES.DAY;
+  #pointsToRender = 5;
 
   constructor({boardContainer, pointsModel}) {
     this.boardContainer = boardContainer;
@@ -24,16 +28,21 @@ export default class BoardPresenter {
       return;
     }
 
-    render(new SortView(), this.boardContainer);
+    this.#sortComponent = new SortView();
+    this.#sortComponent.setSortTypeChangeHandler(this.#handleSortTypeChange);
+    render(this.#sortComponent, this.boardContainer);
     render(new CreateFormView(), this.boardContainer);
     render(this.pointListComponent, this.boardContainer);
+    this.#renderPoints(points, destinations, offersByType);
+  }
 
-    const POINTS_TO_RENDER = 5;
+  #renderPoints(points, destinations, offersByType) {
+    const sortedPoints = this.#getSortedPoints(points);
 
-    for (let i = 0; i < Math.min(points.length, POINTS_TO_RENDER); i++) {
+    for (let i = 0; i < Math.min(sortedPoints.length, this.#pointsToRender); i++) {
       const pointPresenter = new PointPresenter({
         pointListContainer: this.pointListComponent.element,
-        point: points[i],
+        point: sortedPoints[i],
         destinations,
         offersByType,
         onPointChange: this.#handlePointChange,
@@ -46,10 +55,21 @@ export default class BoardPresenter {
 
   #handlePointChange = (updatedPoint) => {
     this.pointsModel.updatePoint(updatedPoint);
-    const presenter = this.#pointPresenters.find(
-      (item) => item.pointId === updatedPoint.id,
+
+    if (this.#currentSortType === SORT_TYPES.DAY) {
+      const presenter = this.#pointPresenters.find(
+        (item) => item.pointId === updatedPoint.id,
+      );
+      presenter?.update(updatedPoint);
+      return;
+    }
+
+    this.#clearPointList();
+    this.#renderPoints(
+      this.pointsModel.getPoints(),
+      this.pointsModel.getDestinations(),
+      this.pointsModel.getOffersByType(),
     );
-    presenter?.update(updatedPoint);
   };
 
   #resetAllPointViewsToDefault = () => {
@@ -57,4 +77,43 @@ export default class BoardPresenter {
       presenter.resetView();
     }
   };
+
+  #clearPointList() {
+    for (const presenter of this.#pointPresenters) {
+      presenter.destroy();
+    }
+    this.#pointPresenters = [];
+  }
+
+  #handleSortTypeChange = (sortType) => {
+    if (this.#currentSortType === sortType) {
+      return;
+    }
+
+    this.#currentSortType = sortType;
+    this.#clearPointList();
+    this.#renderPoints(
+      this.pointsModel.getPoints(),
+      this.pointsModel.getDestinations(),
+      this.pointsModel.getOffersByType(),
+    );
+  };
+
+  #getSortedPoints(points) {
+    const pointsCopy = points.slice();
+
+    switch (this.#currentSortType) {
+      case SORT_TYPES.TIME:
+        return pointsCopy.sort((pointA, pointB) => {
+          const durationA = pointA.dateTo.getTime() - pointA.dateFrom.getTime();
+          const durationB = pointB.dateTo.getTime() - pointB.dateFrom.getTime();
+          return durationB - durationA;
+        });
+      case SORT_TYPES.PRICE:
+        return pointsCopy.sort((pointA, pointB) => pointB.basePrice - pointA.basePrice);
+      case SORT_TYPES.DAY:
+      default:
+        return pointsCopy.sort((pointA, pointB) => pointA.dateFrom - pointB.dateFrom);
+    }
+  }
 }

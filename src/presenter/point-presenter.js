@@ -1,6 +1,6 @@
 import PointView from '../view/point-view.js';
 import EditFormView from '../view/edit-form-view.js';
-import {render, replace} from '../framework/render.js';
+import {render, replace, remove} from '../framework/render.js';
 
 export default class PointPresenter {
   #pointListContainer = null;
@@ -142,5 +142,11 @@ export default class PointPresenter {
     this.#pointComponent = this.#createPointComponent();
     replace(this.#pointComponent, oldPointComponent);
     this.#editFormComponent = this.#createEditFormComponent();
+  }
+
+  destroy() {
+    document.removeEventListener('keydown', this.#escKeyDownHandler);
+    remove(this.#pointComponent);
+    remove(this.#editFormComponent);
   }
 }
