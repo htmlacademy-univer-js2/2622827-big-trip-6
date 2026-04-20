@@ -19,5 +19,11 @@ const FILTER_TYPES = {
 
 const EMPTY_LIST_MESSAGE = 'Click New Event to create your first point';
 
-export {POINT_TYPES, FILTER_TYPES, EMPTY_LIST_MESSAGE};
+const SORT_TYPES = {
+  DAY: 'day',
+  TIME: 'time',
+  PRICE: 'price',
+};
+
+export {POINT_TYPES, FILTER_TYPES, EMPTY_LIST_MESSAGE, SORT_TYPES};
 
