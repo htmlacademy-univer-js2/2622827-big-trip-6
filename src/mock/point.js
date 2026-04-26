@@ -29,10 +29,12 @@ const generateDescription = () => {
 };
 
 const generatePictures = () => {
-  const pictureCount = getRandomInteger(1, 5);
+  const photoIndexes = [1, 2, 3, 4, 5]
+    .sort(() => Math.random() - 0.5)
+    .slice(0, getRandomInteger(1, 5));
 
-  return Array.from({length: pictureCount}, () => ({
-    src: `https://loremflickr.com/248/152?random=${getRandomInteger(1, 1000)}`,
+  return photoIndexes.map((index) => ({
+    src: `img/photos/${index}.jpg`,
     description: 'Event photo',
   }));
 };

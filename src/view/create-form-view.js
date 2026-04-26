@@ -168,7 +168,7 @@ export default class CreateFormView extends AbstractStatefulView {
       .addEventListener('change', this.#typeChangeHandler);
     this.element
       .querySelector('.event__input--destination')
-      .addEventListener('change', this.#destinationChangeHandler);
+      .addEventListener('input', this.#destinationChangeHandler);
   }
 
   #formSubmitHandler = (evt) => {
@@ -195,6 +195,10 @@ export default class CreateFormView extends AbstractStatefulView {
     );
 
     if (!selectedDestination) {
+      return;
+    }
+
+    if (selectedDestination.id === this._state.point.destinationId) {
       return;
     }
 
