@@ -99,14 +99,10 @@ export default class PointPresenter {
   }
 
   #createEditFormComponent() {
-    const destination = this.#getDestination();
-    const offersOfType = this.#getAllOffersOfType();
-
     return new EditFormView({
       point: this.#point,
-      destination,
-      offers: offersOfType,
       destinations: this.#destinations,
+      offersByType: this.#offersByType,
       onFormSubmit: this.#replaceFormToPoint,
       onRollupClick: this.#replaceFormToPoint,
     });
