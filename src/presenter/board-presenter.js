@@ -31,7 +31,7 @@ export default class BoardPresenter {
     this.#sortComponent = new SortView();
     this.#sortComponent.setSortTypeChangeHandler(this.#handleSortTypeChange);
     render(this.#sortComponent, this.boardContainer);
-    render(new CreateFormView(), this.boardContainer);
+    render(new CreateFormView({destinations, offersByType}), this.boardContainer);
     render(this.pointListComponent, this.boardContainer);
     this.#renderPoints(points, destinations, offersByType);
   }
