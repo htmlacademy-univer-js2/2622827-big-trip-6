@@ -1,6 +1,11 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
+import dayjs from 'dayjs';
+import flatpickr from 'flatpickr';
+import 'flatpickr/dist/flatpickr.min.css';
 import {POINT_TYPES} from '../const.js';
 import {humanizeEditFormDateTime} from '../utils.js';
+
+const FLATPICKR_DATE_TIME_FORMAT = 'd/m/y H:i';
 
 const createEventTypeItemsTemplate = (currentType) =>
   POINT_TYPES.map((type) => {
@@ -144,6 +149,8 @@ const createEditFormTemplate = ({point, destinations, offersByType}) => {
 export default class EditFormView extends AbstractStatefulView {
   #handleFormSubmit;
   #handleRollupClick;
+  #dateFromPicker = null;
+  #dateToPicker = null;
 
   constructor({point, destinations, offersByType, onFormSubmit, onRollupClick}) {
     super();
@@ -180,6 +187,72 @@ export default class EditFormView extends AbstractStatefulView {
     this.element
       .querySelector('.event__input--destination')
       .addEventListener('input', this.#destinationChangeHandler);
+    this.#initDatePickers();
+  }
+
+  removeElement() {
+    this.#destroyDatePickers();
+    super.removeElement();
+  }
+
+  #destroyDatePickers() {
+    this.#dateFromPicker?.destroy();
+    this.#dateToPicker?.destroy();
+    this.#dateFromPicker = null;
+    this.#dateToPicker = null;
+  }
+
+  #initDatePickers() {
+    const startInput = this.element.querySelector('#event-start-time-1');
+    const endInput = this.element.querySelector('#event-end-time-1');
+
+    this.#dateFromPicker = flatpickr(startInput, {
+      dateFormat: FLATPICKR_DATE_TIME_FORMAT,
+      defaultDate: this._state.point.dateFrom,
+      enableTime: true,
+      // eslint-disable-next-line camelcase -- flatpickr option
+      time_24hr: true,
+      onClose: (selectedDates) => {
+        if (!selectedDates[0]) {
+          return;
+        }
+
+        if (dayjs(selectedDates[0]).valueOf() === dayjs(this._state.point.dateFrom).valueOf()) {
+          return;
+        }
+
+        this.updateElement({
+          point: {
+            ...this._state.point,
+            dateFrom: selectedDates[0],
+          },
+        });
+      },
+    });
+
+    this.#dateToPicker = flatpickr(endInput, {
+      dateFormat: FLATPICKR_DATE_TIME_FORMAT,
+      defaultDate: this._state.point.dateTo,
+      enableTime: true,
+      // eslint-disable-next-line camelcase -- flatpickr option
+      time_24hr: true,
+      onClose: (selectedDates) => {
+        if (!selectedDates[0]) {
+          return;
+        }
+
+        if (dayjs(selectedDates[0]).valueOf() === dayjs(this._state.point.dateTo).valueOf()) {
+          return;
+        }
+
+        this.updateElement({
+          point: {
+            ...this._state.point,
+            dateTo: selectedDates[0],
+          },
+        });
+      },
+    });
   }
 
   #formSubmitHandler = (evt) => {
