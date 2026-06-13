@@ -1,12 +1,15 @@
 import PointView from '../view/point-view.js';
 import EditFormView from '../view/edit-form-view.js';
 import {render, replace, remove} from '../framework/render.js';
-import {USER_ACTIONS} from '../const.js';
-
-const SAVE_BUTTON_DEFAULT_TEXT = 'Save';
-const SAVE_BUTTON_SAVING_TEXT = 'Saving...';
-const DELETE_BUTTON_DEFAULT_TEXT = 'Delete';
-const DELETE_BUTTON_DELETING_TEXT = 'Deleting...';
+import {SHAKE_CLASS_NAME, SHAKE_ANIMATION_TIMEOUT} from '../framework/view/abstract-view.js';
+import {
+  USER_ACTIONS,
+  SAVE_BUTTON_DEFAULT_TEXT,
+  SAVE_BUTTON_SAVING_TEXT,
+  DELETE_BUTTON_DEFAULT_TEXT,
+  DELETE_BUTTON_DELETING_TEXT,
+} from '../const.js';
+import {isEscapeKey} from '../utils.js';
 
 export default class PointPresenter {
   #pointListContainer = null;
@@ -40,10 +43,6 @@ export default class PointPresenter {
     this.#uiBlocker = uiBlocker;
   }
 
-  get pointId() {
-    return this.#point.id;
-  }
-
   init() {
     this.#renderPoint();
     this.#listItemElement = document.createElement('li');
@@ -69,7 +68,7 @@ export default class PointPresenter {
   }
 
   #escKeyDownHandler = (evt) => {
-    if (evt.key === 'Escape' || evt.key === 'Esc') {
+    if (isEscapeKey(evt)) {
       evt.preventDefault();
       this.#editFormComponent?.setSaveButtonText(SAVE_BUTTON_DEFAULT_TEXT);
       this.#editFormComponent?.setDeleteButtonText(DELETE_BUTTON_DEFAULT_TEXT);
@@ -93,11 +92,11 @@ export default class PointPresenter {
   };
 
   #shakeListItem() {
-    this.#listItemElement.classList.add('shake');
+    this.#listItemElement.classList.add(SHAKE_CLASS_NAME);
 
     setTimeout(() => {
-      this.#listItemElement.classList.remove('shake');
-    }, 600);
+      this.#listItemElement.classList.remove(SHAKE_CLASS_NAME);
+    }, SHAKE_ANIMATION_TIMEOUT);
   }
 
   #handleFormSubmit = async (updatedPoint) => {
@@ -184,22 +183,6 @@ export default class PointPresenter {
     this.#editFormComponent?.setSaveButtonText(SAVE_BUTTON_DEFAULT_TEXT);
     this.#editFormComponent?.setDeleteButtonText(DELETE_BUTTON_DEFAULT_TEXT);
     this.#replaceFormToPoint();
-  }
-
-  update(updatedPoint) {
-    this.#point = updatedPoint;
-
-    if (!this.#isPointMode) {
-      const oldEditForm = this.#editFormComponent;
-      this.#editFormComponent = this.#createEditFormComponent();
-      replace(this.#editFormComponent, oldEditForm);
-      this.#pointComponent = this.#createPointComponent();
-      return;
-    }
-
-    const oldPointComponent = this.#pointComponent;
-    this.#pointComponent = this.#createPointComponent();
-    replace(this.#pointComponent, oldPointComponent);
   }
 
   destroy() {

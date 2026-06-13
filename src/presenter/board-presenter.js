@@ -4,11 +4,9 @@ import NoPointView from '../view/no-point-view.js';
 import CreateFormView from '../view/create-form-view.js';
 import PointPresenter from './point-presenter.js';
 import {remove, render} from '../framework/render.js';
-import {FILTER_TYPES, SORT_TYPES, USER_ACTIONS} from '../const.js';
+import {FILTER_TYPES, SORT_TYPES, USER_ACTIONS, UPDATE_TYPES, SAVE_BUTTON_DEFAULT_TEXT, SAVE_BUTTON_SAVING_TEXT} from '../const.js';
+import {isEscapeKey} from '../utils.js';
 import {filter} from '../utils/filter.js';
-
-const SAVE_BUTTON_DEFAULT_TEXT = 'Save';
-const SAVE_BUTTON_SAVING_TEXT = 'Saving...';
 
 export default class BoardPresenter {
   pointListComponent = new PointListView();
@@ -140,7 +138,7 @@ export default class BoardPresenter {
   };
 
   #handleModelEvent = (event) => {
-    if (event === 'filterTypeChange') {
+    if (event === UPDATE_TYPES.FILTER) {
       this.#currentSortType = SORT_TYPES.DAY;
     }
 
@@ -210,7 +208,7 @@ export default class BoardPresenter {
   };
 
   #escKeyDownHandler = (evt) => {
-    if (evt.key === 'Escape' || evt.key === 'Esc') {
+    if (isEscapeKey(evt)) {
       evt.preventDefault();
       this.#destroyCreateForm();
     }

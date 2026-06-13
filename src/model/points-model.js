@@ -1,6 +1,11 @@
 import {adaptToApp} from '../api/adapters/point-adapter.js';
-import {generateFilters} from '../utils/filter.js';
 import Observable from '../framework/observable.js';
+import {
+  UPDATE_TYPES,
+  FAILED_LOAD_POINTS_MESSAGE,
+  FAILED_LOAD_DESTINATIONS_MESSAGE,
+  FAILED_LOAD_OFFERS_MESSAGE,
+} from '../const.js';
 
 export default class PointsModel extends Observable {
   #api = null;
@@ -19,7 +24,7 @@ export default class PointsModel extends Observable {
       this.points = Array.isArray(points) ? points.map(adaptToApp) : [];
     } catch {
       this.points = [];
-      throw new Error('Failed to load points');
+      throw new Error(FAILED_LOAD_POINTS_MESSAGE);
     }
 
     try {
@@ -27,7 +32,7 @@ export default class PointsModel extends Observable {
       this.destinations = Array.isArray(destinations) ? destinations : [];
     } catch {
       this.destinations = [];
-      throw new Error('Failed to load destinations');
+      throw new Error(FAILED_LOAD_DESTINATIONS_MESSAGE);
     }
 
     try {
@@ -35,10 +40,10 @@ export default class PointsModel extends Observable {
       this.offersByType = Array.isArray(offers) ? offers : [];
     } catch {
       this.offersByType = [];
-      throw new Error('Failed to load offers');
+      throw new Error(FAILED_LOAD_OFFERS_MESSAGE);
     }
 
-    this._notify('pointsListChange', this.getPoints());
+    this._notify(UPDATE_TYPES.POINTS_LIST, this.getPoints());
   }
 
   getPoints() {
@@ -47,7 +52,7 @@ export default class PointsModel extends Observable {
 
   setPoints(points) {
     this.points = points.slice();
-    this._notify('pointsListChange', this.getPoints());
+    this._notify(UPDATE_TYPES.POINTS_LIST, this.getPoints());
   }
 
   async updatePoint(pointId, updatedPoint) {
@@ -96,9 +101,5 @@ export default class PointsModel extends Observable {
 
   getOffersByType() {
     return this.offersByType;
-  }
-
-  getFilters() {
-    return generateFilters(this.getPoints());
   }
 }

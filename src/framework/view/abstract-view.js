@@ -10,6 +10,7 @@ const SHAKE_ANIMATION_TIMEOUT = 600;
 /**
  * Абстрактный класс представления
  */
+export {SHAKE_CLASS_NAME, SHAKE_ANIMATION_TIMEOUT};
 export default class AbstractView {
   /** @type {HTMLElement|null} Элемент представления */
   #element = null;

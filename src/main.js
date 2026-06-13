@@ -8,7 +8,15 @@ import LoadingView from './view/loading-view.js';
 import FailedLoadView from './view/failed-load-view.js';
 import UiBlocker from './framework/ui-blocker/ui-blocker.js';
 import {render, remove} from './framework/render.js';
-import {API_URL} from './const.js';
+import {
+  API_URL,
+  AUTH_TOKEN_RADIX,
+  AUTH_TOKEN_START,
+  AUTH_TOKEN_END,
+  AUTHORIZATION_PREFIX,
+  UI_BLOCKER_LOWER_LIMIT,
+  UI_BLOCKER_UPPER_LIMIT,
+} from './const.js';
 
 const tripMainContainer = document.querySelector('.trip-main');
 const filtersContainer = document.querySelector('.trip-controls__filters');
@@ -16,11 +24,14 @@ const tripEventsSection = document.querySelector('.trip-events');
 const newPointButton = document.querySelector('.trip-main__event-add-btn');
 newPointButton.disabled = true;
 
-const authorization = `Basic ${Math.random().toString(36).slice(2, 14)}`;
+const authorization = `${AUTHORIZATION_PREFIX}${Math.random().toString(AUTH_TOKEN_RADIX).slice(AUTH_TOKEN_START, AUTH_TOKEN_END)}`;
 const tripApi = new TripApi(API_URL, authorization);
 const pointsModel = new PointsModel({api: tripApi});
 const filterModel = new FilterModel();
-const uiBlocker = new UiBlocker({lowerLimit: 350, upperLimit: 500});
+const uiBlocker = new UiBlocker({
+  lowerLimit: UI_BLOCKER_LOWER_LIMIT,
+  upperLimit: UI_BLOCKER_UPPER_LIMIT,
+});
 
 const boardPresenter = new BoardPresenter({
   boardContainer: tripEventsSection,

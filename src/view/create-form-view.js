@@ -2,10 +2,19 @@ import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import dayjs from 'dayjs';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
-import {POINT_TYPES} from '../const.js';
+import {
+  POINT_TYPES,
+  DEFAULT_POINT_TYPE,
+  DEFAULT_CREATE_PRICE,
+  MIN_CREATE_PRICE,
+  MIN_POINT_PRICE,
+  PRICE_STEP,
+  OFFER_ID_PREFIX,
+  FLATPICKR_DATE_TIME_FORMAT,
+  SAVE_BUTTON_DEFAULT_TEXT,
+  CANCEL_BUTTON_TEXT,
+} from '../const.js';
 import {humanizeEditFormDateTime} from '../utils.js';
-
-const FLATPICKR_DATE_TIME_FORMAT = 'd/m/y H:i';
 
 const createEventTypeItemsTemplate = (currentType) =>
   POINT_TYPES.map((type) => {
@@ -110,8 +119,8 @@ const createCreateFormTemplate = ({point, destinations, offersByType}) => {
   const typeLabel = `${currentType.charAt(0).toUpperCase()}${currentType.slice(1)}`;
   const destination = destinations.find((item) => item.id === point.destinationId);
   const destinationName = destination?.name ?? '';
-  const dateFrom = humanizeEditFormDateTime(point.dateFrom);
-  const dateTo = humanizeEditFormDateTime(point.dateTo);
+  const dateFrom = point.dateFrom ? humanizeEditFormDateTime(point.dateFrom) : '';
+  const dateTo = point.dateTo ? humanizeEditFormDateTime(point.dateTo) : '';
   const offersOfType = offersByType.find((offerItem) => offerItem.type === currentType)?.offers ?? [];
 
   const eventTypeItemsTemplate = createEventTypeItemsTemplate(currentType);
@@ -158,11 +167,11 @@ const createCreateFormTemplate = ({point, destinations, offersByType}) => {
             <span class="visually-hidden">Price</span>
             &euro;
           </label>
-          <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" value="${point.basePrice}" min="1" step="1" required>
+          <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" value="${point.basePrice}" min="${MIN_CREATE_PRICE}" step="${PRICE_STEP}" required>
         </div>
 
-        <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-        <button class="event__reset-btn" type="reset">Cancel</button>
+        <button class="event__save-btn  btn  btn--blue" type="submit">${SAVE_BUTTON_DEFAULT_TEXT}</button>
+        <button class="event__reset-btn" type="reset">${CANCEL_BUTTON_TEXT}</button>
       </header>
       <section class="event__details">
         ${offersSectionTemplate}
@@ -173,11 +182,11 @@ const createCreateFormTemplate = ({point, destinations, offersByType}) => {
 };
 
 const createDefaultPoint = () => ({
-  type: 'flight',
+  type: DEFAULT_POINT_TYPE,
   destinationId: null,
-  dateFrom: new Date(),
-  dateTo: new Date(),
-  basePrice: 1,
+  dateFrom: null,
+  dateTo: null,
+  basePrice: DEFAULT_CREATE_PRICE,
   offers: [],
   isFavorite: false,
 });
@@ -249,7 +258,7 @@ export default class CreateFormView extends AbstractStatefulView {
 
     this.#dateFromPicker = flatpickr(startInput, {
       dateFormat: FLATPICKR_DATE_TIME_FORMAT,
-      defaultDate: this._state.point.dateFrom,
+      defaultDate: this._state.point.dateFrom ?? undefined,
       enableTime: true,
       // eslint-disable-next-line camelcase -- flatpickr option
       time_24hr: true,
@@ -260,7 +269,7 @@ export default class CreateFormView extends AbstractStatefulView {
 
     this.#dateToPicker = flatpickr(endInput, {
       dateFormat: FLATPICKR_DATE_TIME_FORMAT,
-      defaultDate: this._state.point.dateTo,
+      defaultDate: this._state.point.dateTo ?? undefined,
       enableTime: true,
       // eslint-disable-next-line camelcase -- flatpickr option
       time_24hr: true,
@@ -275,7 +284,7 @@ export default class CreateFormView extends AbstractStatefulView {
       return;
     }
 
-    if (dayjs(dateFrom).valueOf() === dayjs(this._state.point.dateFrom).valueOf()) {
+    if (this._state.point.dateFrom && dayjs(dateFrom).valueOf() === dayjs(this._state.point.dateFrom).valueOf()) {
       return;
     }
 
@@ -294,7 +303,7 @@ export default class CreateFormView extends AbstractStatefulView {
       return;
     }
 
-    if (dayjs(dateTo).valueOf() === dayjs(this._state.point.dateTo).valueOf()) {
+    if (this._state.point.dateTo && dayjs(dateTo).valueOf() === dayjs(this._state.point.dateTo).valueOf()) {
       return;
     }
 
@@ -391,7 +400,7 @@ export default class CreateFormView extends AbstractStatefulView {
   #offersChangeHandler = () => {
     const selectedOffers = Array.from(
       this.element.querySelectorAll('.event__offer-checkbox:checked'),
-    ).map((offerElement) => offerElement.id.replace('event-offer-', ''));
+    ).map((offerElement) => offerElement.id.replace(OFFER_ID_PREFIX, ''));
 
     this._setState({
       point: {
@@ -404,7 +413,7 @@ export default class CreateFormView extends AbstractStatefulView {
   #priceChangeHandler = (evt) => {
     const parsedPrice = Number(evt.target.value);
 
-    if (!Number.isInteger(parsedPrice) || parsedPrice < 1) {
+    if (!Number.isInteger(parsedPrice) || parsedPrice < MIN_CREATE_PRICE) {
       evt.target.value = String(this._state.point.basePrice);
       return;
     }
@@ -435,7 +444,7 @@ export default class CreateFormView extends AbstractStatefulView {
       (destination) => destination.id === this._state.point.destinationId,
     );
     const hasValidPrice =
-      Number.isInteger(this._state.point.basePrice) && this._state.point.basePrice >= 1;
+      Number.isInteger(this._state.point.basePrice) && this._state.point.basePrice >= MIN_POINT_PRICE;
 
     return hasDestination && hasValidPrice;
   }

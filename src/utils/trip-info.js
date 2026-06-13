@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import {DATE_FORMATS, MAX_ROUTE_CITIES} from '../const.js';
 
 const getRouteTitle = (points, destinations) => {
   if (points.length === 0) {
@@ -22,7 +23,7 @@ const getRouteTitle = (points, destinations) => {
     return '';
   }
 
-  if (cityNames.length <= 3) {
+  if (cityNames.length <= MAX_ROUTE_CITIES) {
     return cityNames.join(' &mdash; ');
   }
 
@@ -40,11 +41,11 @@ const getTripDates = (points) => {
   const from = dayjs(dateFrom);
   const to = dayjs(dateTo);
 
-  if (from.format('MMM') === to.format('MMM')) {
-    return `${from.format('D')}&nbsp;&mdash;&nbsp;${to.format('D MMM')}`;
+  if (from.format(DATE_FORMATS.TRIP_MONTH) === to.format(DATE_FORMATS.TRIP_MONTH)) {
+    return `${from.format(DATE_FORMATS.TRIP_DAY)}&nbsp;&mdash;&nbsp;${to.format(DATE_FORMATS.TRIP_DAY_MONTH)}`;
   }
 
-  return `${from.format('D MMM')}&nbsp;&mdash;&nbsp;${to.format('D MMM')}`;
+  return `${from.format(DATE_FORMATS.TRIP_DAY_MONTH)}&nbsp;&mdash;&nbsp;${to.format(DATE_FORMATS.TRIP_DAY_MONTH)}`;
 };
 
 const getOffersPrice = (point, offersByType) => {

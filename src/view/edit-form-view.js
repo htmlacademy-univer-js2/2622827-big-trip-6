@@ -2,10 +2,16 @@ import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import dayjs from 'dayjs';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
-import {POINT_TYPES} from '../const.js';
+import {
+  POINT_TYPES,
+  MIN_POINT_PRICE,
+  PRICE_STEP,
+  OFFER_ID_PREFIX,
+  FLATPICKR_DATE_TIME_FORMAT,
+  SAVE_BUTTON_DEFAULT_TEXT,
+  DELETE_BUTTON_DEFAULT_TEXT,
+} from '../const.js';
 import {humanizeEditFormDateTime} from '../utils.js';
-
-const FLATPICKR_DATE_TIME_FORMAT = 'd/m/y H:i';
 
 const createEventTypeItemsTemplate = (currentType) =>
   POINT_TYPES.map((type) => {
@@ -163,11 +169,11 @@ const createEditFormTemplate = ({point, destinations, offersByType}) => {
             <span class="visually-hidden">Price</span>
             &euro;
           </label>
-          <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" value="${basePrice}" min="1" step="1" required>
+          <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" value="${basePrice}" min="${MIN_POINT_PRICE}" step="${PRICE_STEP}" required>
         </div>
 
-        <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-        <button class="event__reset-btn" type="reset">Delete</button>
+        <button class="event__save-btn  btn  btn--blue" type="submit">${SAVE_BUTTON_DEFAULT_TEXT}</button>
+        <button class="event__reset-btn" type="reset">${DELETE_BUTTON_DEFAULT_TEXT}</button>
         <button class="event__rollup-btn" type="button">
           <span class="visually-hidden">Open event</span>
         </button>
@@ -404,7 +410,7 @@ export default class EditFormView extends AbstractStatefulView {
   #priceChangeHandler = (evt) => {
     const parsedPrice = Number(evt.target.value);
 
-    if (!Number.isInteger(parsedPrice) || parsedPrice < 1) {
+    if (!Number.isInteger(parsedPrice) || parsedPrice < MIN_POINT_PRICE) {
       evt.target.value = String(this._state.point.basePrice);
       return;
     }
@@ -424,7 +430,7 @@ export default class EditFormView extends AbstractStatefulView {
   #offersChangeHandler = () => {
     const selectedOffers = Array.from(
       this.element.querySelectorAll('.event__offer-checkbox:checked'),
-    ).map((offerElement) => offerElement.id.replace('event-offer-', ''));
+    ).map((offerElement) => offerElement.id.replace(OFFER_ID_PREFIX, ''));
 
     this._setState({
       point: {
@@ -448,7 +454,7 @@ export default class EditFormView extends AbstractStatefulView {
       (destination) => destination.id === this._state.point.destinationId,
     );
     const hasValidPrice =
-      Number.isInteger(this._state.point.basePrice) && this._state.point.basePrice >= 1;
+      Number.isInteger(this._state.point.basePrice) && this._state.point.basePrice >= MIN_POINT_PRICE;
 
     return hasDestination && hasValidPrice;
   }

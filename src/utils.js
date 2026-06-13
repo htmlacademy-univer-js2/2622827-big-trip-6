@@ -1,27 +1,22 @@
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
+import {KEYBOARD_KEYS, DATE_FORMATS, PAD_LENGTH, PAD_FILL} from './const.js';
 
 dayjs.extend(duration);
 
-const padZero = (value) => String(value).padStart(2, '0');
+const padZero = (value) => String(value).padStart(PAD_LENGTH, PAD_FILL);
 
-const getRandomInteger = (a = 0, b = 1) => {
-  const lower = Math.ceil(Math.min(a, b));
-  const upper = Math.floor(Math.max(a, b));
-
-  return Math.floor(Math.random() * (upper - lower + 1)) + lower;
-};
-
-const getRandomArrayElement = (items) => items[getRandomInteger(0, items.length - 1)];
+const isEscapeKey = (evt) =>
+  evt.key === KEYBOARD_KEYS.ESCAPE || evt.key === KEYBOARD_KEYS.ESC;
 
 const humanizePointDate = (date) =>
-  dayjs(date).format('MMM DD').toUpperCase();
+  dayjs(date).format(DATE_FORMATS.POINT_DATE).toUpperCase();
 
 const humanizePointTime = (date) =>
-  dayjs(date).format('HH:mm');
+  dayjs(date).format(DATE_FORMATS.POINT_TIME);
 
 const humanizeEditFormDateTime = (date) =>
-  dayjs(date).format('DD/MM/YY HH:mm');
+  dayjs(date).format(DATE_FORMATS.EDIT_FORM);
 
 const getDuration = (dateFrom, dateTo) => {
   const pointDuration = dayjs.duration(dayjs(dateTo).diff(dayjs(dateFrom)));
@@ -41,8 +36,7 @@ const getDuration = (dateFrom, dateTo) => {
 };
 
 export {
-  getRandomInteger,
-  getRandomArrayElement,
+  isEscapeKey,
   humanizePointDate,
   humanizePointTime,
   humanizeEditFormDateTime,

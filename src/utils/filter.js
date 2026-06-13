@@ -1,4 +1,4 @@
-import {FILTER_TYPES} from '../const.js';
+import {FILTER_TYPES, FILTER_NAMES} from '../const.js';
 
 const isFuturePoint = (point, now) => point.dateFrom > now;
 const isPastPoint = (point, now) => point.dateTo < now;
@@ -27,25 +27,25 @@ const generateFilters = (points, currentFilter) => {
   return [
     {
       type: FILTER_TYPES.EVERYTHING,
-      name: 'Everything',
+      name: FILTER_NAMES[FILTER_TYPES.EVERYTHING],
       isChecked: currentFilter === FILTER_TYPES.EVERYTHING,
       isDisabled: false,
     },
     {
       type: FILTER_TYPES.FUTURE,
-      name: 'Future',
+      name: FILTER_NAMES[FILTER_TYPES.FUTURE],
       isChecked: currentFilter === FILTER_TYPES.FUTURE,
       isDisabled: !points.some((point) => isFuturePoint(point, now)),
     },
     {
       type: FILTER_TYPES.PRESENT,
-      name: 'Present',
+      name: FILTER_NAMES[FILTER_TYPES.PRESENT],
       isChecked: currentFilter === FILTER_TYPES.PRESENT,
       isDisabled: !points.some((point) => isPresentPoint(point, now)),
     },
     {
       type: FILTER_TYPES.PAST,
-      name: 'Past',
+      name: FILTER_NAMES[FILTER_TYPES.PAST],
       isChecked: currentFilter === FILTER_TYPES.PAST,
       isDisabled: !points.some((point) => isPastPoint(point, now)),
     },
